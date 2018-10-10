@@ -111,7 +111,7 @@ void kernel checkDepth(global const int4 *idx, global const ushort *zImg, global
 
   const int4 index = idx[i];
   const ushort zI = zImg[i];
-  const ushort thres = 0.01 * zI;
+  const ushort thres = 0.01f * zI;
   const ushort zIThres = zI + thres;
   const float4 dist2 = dists[i];
 
@@ -166,7 +166,7 @@ void kernel remapDepth(global const ushort *in, global ushort *out, global const
   const uint iRB = iLB + 1;
 
   const float4 p = (float4)(in[iLT], in[iRT], in[iLB], in[iRB]);
-  int4 valid = isgreaterequal(p, (float4)(1));
+  int4 valid = isgreaterequal(p, (float4)(1.0f));
   int count = abs(valid.s0 + valid.s1 + valid.s2 + valid.s3);
 
   if(count < 3)
@@ -176,7 +176,7 @@ void kernel remapDepth(global const ushort *in, global ushort *out, global const
   }
 
   const float avg = (p.s0 + p.s1 + p.s2 + p.s3) / count;
-  const float thres = 0.01 * avg;
+  const float thres = 0.01f * avg;
   valid = isless(fabs(p - avg), (float4)(thres));
   count = abs(valid.s0 + valid.s1 + valid.s2 + valid.s3);
 
@@ -187,10 +187,10 @@ void kernel remapDepth(global const ushort *in, global ushort *out, global const
   }
 
   const float4 distXY = (float4)((x - xL) * (x - xL), (xH - x) * (xH - x), (y - yL) * (y - yL), (yH - y) * (yH - y));
-  const float4 tmp = (float4)(sqrt(2.0));
+  const float4 tmp = (float4)(sqrt((float4)2.0f));
   const float4 dist2 = (float4)(distXY.s0 + distXY.s2, distXY.s1 + distXY.s2, distXY.s0 + distXY.s3, distXY.s1 + distXY.s3);
-  const float4 dist = select((float4)(0), tmp - sqrt(dist2), valid);
+  const float4 dist = select((float4)(0.0f), tmp - sqrt((float4)dist2), valid);
   const float sum = dist.s0 + dist.s1 + dist.s2 + dist.s3;
 
-  out[i] = (dot(p, dist) / sum) + 0.5;
+  out[i] = (dot(p, dist) / sum) + 0.5f;
 }
